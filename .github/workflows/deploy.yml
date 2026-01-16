@@ -66,15 +66,15 @@ jobs:
           CRON_IP_WHITELIST: ${{ secrets.CRON_IP_WHITELIST }}
         run: pnpm run build
 
-      - name: Build with OpenNext for Cloudflare
-        run: pnpm build:cloudflare
+      - name: Build with @cloudflare/next-on-pages
+        run: npx @cloudflare/next-on-pages
 
       - name: List build output
-        run: find . -type d -name ".open-next" -o -name ".worker" -o -name "worker" 2>/dev/null | head -5
+        run: ls -la .vercel/output/static || ls -la .worker || echo "Build output check"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: wrangler pages deploy .open-next --project-name=momcomm
+          command: wrangler pages deploy .vercel/output/static --project-name=momcomm
