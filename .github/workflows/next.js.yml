@@ -1,0 +1,124 @@
+name: 'Next.js App Deploy'
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.kleesgolf.com
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      HOST: ${{ vars.HOST }}
+      SSH_DP_USER: ${{ secrets.SSH_DP_USER }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
+      NEXT_PUBLIC_TWITTER_HANDLE: ${{ vars.NEXT_PUBLIC_TWITTER_HANDLE }}
+      NEXT_PUBLIC_AMAZON_AFFILIATE_TAG: ${{ vars.NEXT_PUBLIC_AMAZON_AFFILIATE_TAG }}
+      NEXT_PUBLIC_GA_ID: ${{ vars.NEXT_PUBLIC_GA_ID }}
+      PAYLOAD_SECRET: YOUR_SECRET_HERE
+      DATABASE_URI: postgres://postgres:password@127.0.0.1:5432/test
+      NODE_ENV: production
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: CheckoutRepository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies and generate types
+        run: |
+          pnpm install
+          pnpm run generate:types
+          pnpm run payload migrate
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Get Postgres IP
+        run: |
+          CONTAINER_ID=$(docker ps --filter ancestor=postgres:15 --format "{{.ID}}" | head -n 1)
+          if [ -z "$CONTAINER_ID" ]; then
+             echo "Postgres container not found!"
+             exit 1
+          fi
+          POSTGRES_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
+          POSTGRES_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_ID)
+          echo "PG_HOST=$POSTGRES_IP" >> $GITHUB_ENV
+          echo "Found Postgres at $POSTGRES_IP"
+
+      - name: Docker Build next.js
+        run: |
+          echo ${{ secrets.DOCKER_LOGIN }} | docker login ghcr.io -u seadfeng --password-stdin
+
+
+          VERSION=$(node -p "require('./package.json').version")
+          APP=$(node -p "require('./package.json').name")
+
+          echo "Build: ${APP}.${VERSION}" 
+
+          docker buildx build \
+            --no-cache  \
+            --network=host \
+            --build-arg NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
+            --build-arg NEXT_PUBLIC_TWITTER_HANDLE=$NEXT_PUBLIC_TWITTER_HANDLE \
+            --build-arg NEXT_PUBLIC_AMAZON_AFFILIATE_TAG=$NEXT_PUBLIC_AMAZON_AFFILIATE_TAG \
+            --build-arg NEXT_PUBLIC_GA_ID=$NEXT_PUBLIC_GA_ID \
+            --build-arg DATABASE_URI="postgres://postgres:password@$PG_HOST:5432/test" \
+            --build-arg VERSION=$VERSION \
+            --push \
+            -t ghcr.io/seadfeng/${APP}:$VERSION \
+            -t ghcr.io/seadfeng/${APP}:latest \
+            -f ./Dockerfile \
+            .
+
+          echo "ghcr.io/seadfeng/${APP}:${VERSION}" 
+          echo "ghcr.io/seadfeng/${APP}:latest"
+
+      - name: Configure SSH FOR self_host
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          eval "$(ssh-agent)"
+          ssh-add ~/.ssh/id_rsa
+          cat >>~/.ssh/config <<END
+          Host self_host
+            HostName $HOST
+            User $SSH_DP_USER
+            IdentityFile ~/.ssh/id_rsa
+            StrictHostKeyChecking no
+          END
+
+      - name: Docker Pull && Restart App
+        run: |
+          ssh self_host 'cd /home/deploy/app/kleesgolf.com/.docker/app && sh update_and_restart.sh'
