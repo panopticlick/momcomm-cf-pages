@@ -64,9 +64,7 @@ jobs:
           ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           CRON_IP_WHITELIST: ${{ secrets.CRON_IP_WHITELIST }}
-        run: |
-          pnpm run build
-          pnpm dlx @opennextjs/cloudflare build
+        run: pnpm run build:cloudflare
 
       - name: List build output
         run: ls -la .open-next || ls -la .worker || echo "Build output check"
