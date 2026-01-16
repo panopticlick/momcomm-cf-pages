@@ -41,7 +41,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build with OpenNext Cloudflare
+      - name: Build Next.js
         env:
           NODE_ENV: production
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
@@ -64,10 +64,13 @@ jobs:
           ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           CRON_IP_WHITELIST: ${{ secrets.CRON_IP_WHITELIST }}
-        run: pnpm run build:cloudflare
+        run: pnpm run build
+
+      - name: Build with OpenNext for Cloudflare
+        run: pnpm build:cloudflare
 
       - name: List build output
-        run: ls -la .open-next || ls -la .worker || echo "Build output check"
+        run: find . -type d -name ".open-next" -o -name ".worker" -o -name "worker" 2>/dev/null | head -5
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
