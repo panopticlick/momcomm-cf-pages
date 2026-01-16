@@ -1,0 +1,126 @@
+.prompt-preview-container {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: var(--theme-elevation-50);
+  border: 1px solid var(--theme-elevation-100);
+  border-radius: 4px;
+}
+
+.prompt-preview-container h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.1rem;
+}
+
+.prompt-preview-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--theme-elevation-150);
+}
+
+.prompt-preview-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.prompt-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.prompt-preview-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.prompt-preview-btn {
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+}
+
+.prompt-preview-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Primary - Test Online */
+.prompt-preview-btn--primary {
+  background-color: var(--theme-success-500);
+  color: white;
+  border-color: var(--theme-success-500);
+}
+
+.prompt-preview-btn--primary:hover:not(:disabled) {
+  background-color: var(--theme-success-600);
+  border-color: var(--theme-success-600);
+  transform: translateY(-1px);
+}
+
+/* Secondary - Copy */
+.prompt-preview-btn--secondary {
+  background-color: var(--theme-elevation-100);
+  color: var(--theme-elevation-800);
+  border-color: var(--theme-elevation-200);
+}
+
+.prompt-preview-btn--secondary:hover:not(:disabled) {
+  background-color: var(--theme-elevation-200);
+  border-color: var(--theme-elevation-300);
+}
+
+/* Neutral - Copy Topic Data */
+.prompt-preview-btn--neutral {
+  background-color: transparent;
+  color: var(--theme-elevation-600);
+  border-color: var(--theme-elevation-300);
+}
+
+.prompt-preview-btn--neutral:hover:not(:disabled) {
+  background-color: var(--theme-elevation-50);
+  color: var(--theme-elevation-900);
+  border-color: var(--theme-elevation-400);
+}
+
+.prompt-preview-error {
+  color: var(--theme-error-500);
+  font-size: 0.85rem;
+  margin: 10px 0;
+  padding: 8px;
+  background: var(--theme-error-50);
+  border-radius: 4px;
+}
+
+.prompt-preview-result {
+  margin-top: 10px;
+}
+
+.prompt-preview-result summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--theme-elevation-400);
+  margin-bottom: 5px;
+}
+
+.prompt-preview-result pre {
+  margin: 0;
+  padding: 10px;
+  background-color: var(--theme-elevation-150);
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: monospace;
+  font-size: 0.85rem;
+  max-height: 300px;
+  overflow-y: auto;
+}

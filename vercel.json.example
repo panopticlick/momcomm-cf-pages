@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/process-tasks",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/topics",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/products/create",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/products/paapi5",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/cron/products/scraper",
+      "schedule": "* * * * *"
+    }
+  ]
+}
