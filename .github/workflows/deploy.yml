@@ -66,7 +66,7 @@ jobs:
           CRON_IP_WHITELIST: ${{ secrets.CRON_IP_WHITELIST }}
         run: |
           pnpm run build
-          npx @opennextjs/cloudflare
+          npx @opennextjs/cloudflare build
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
