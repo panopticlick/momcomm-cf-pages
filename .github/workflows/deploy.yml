@@ -68,9 +68,12 @@ jobs:
           pnpm run build
           npx @opennextjs/cloudflare build
 
+      - name: List build output
+        run: ls -la .open-next || ls -la .worker || echo "Build output check"
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .open-next --project-name=momcomm
+          command: wrangler pages deploy .open-next --project-name=momcomm
